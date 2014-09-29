@@ -1,11 +1,11 @@
-#!/usr/bin/python  
+#!/usr/bin/python
 #-*- coding: utf-8 -*-
 #
-# Create by Meibenjin. 
+# Create by Meibenjin.
 #
 # Last updated: 2013-04-02
 #
-# google search results crawler 
+# google search results crawler
 
 import sys
 reload(sys)
@@ -15,7 +15,7 @@ import urllib2, socket, time
 import gzip, StringIO
 import re, random, types
 
-from bs4 import BeautifulSoup 
+from bs4 import BeautifulSoup
 
 base_url = 'https://www.google.com.hk/'
 results_per_page = 10
@@ -26,15 +26,15 @@ user_agents = list()
 # basically include url, title,content
 class SearchResult:
     def __init__(self):
-        self.url= '' 
-        self.title = '' 
-        self.content = '' 
+        self.url= ''
+        self.title = ''
+        self.content = ''
 
     def getURL(self):
         return self.url
 
     def setURL(self, url):
-        self.url = url 
+        self.url = url
 
     def getTitle(self):
         return self.title
@@ -52,7 +52,7 @@ class SearchResult:
         print 'url\t->', self.url
         print 'title\t->', self.title
         print 'content\t->', self.content
-        print 
+        print
 
     def writeFile(self, filename):
         file = open(filename, 'a')
@@ -94,7 +94,7 @@ class GoogleAPI:
         if(url_match and url_match.lastindex > 0):
             url = url_match.group(1)
 
-        return url 
+        return url
 
     # extract serach results list from downloaded html file
     def extractSearchResults(self, html):
@@ -131,9 +131,9 @@ class GoogleAPI:
         return results
 
     # search web
-    # @param query -> query key words 
-    # @param lang -> language of search results  
-    # @param num -> number of search results to return 
+    # @param query -> query key words
+    # @param lang -> language of search results
+    # @param num -> number of search results to return
     def search(self, query, lang='en', num=results_per_page):
         search_results = list()
         query = urllib2.quote(query)
@@ -143,7 +143,7 @@ class GoogleAPI:
             pages = num / results_per_page + 1
 
         for p in range(0, pages):
-            start = p * results_per_page 
+            start = p * results_per_page
             url = '%s/search?hl=%s&num=%dstart=%s&q=%s' % (base_url, lang, results_per_page, start, query)
             retry = 3
             while(retry > 0):
@@ -151,13 +151,13 @@ class GoogleAPI:
                     request = urllib2.Request(url)
                     length = len(user_agents)
                     index = random.randint(0, length-1)
-                    user_agent = user_agents[index] 
+                    user_agent = user_agents[index]
                     request.add_header('User-agent', user_agent)
                     request.add_header('connection','keep-alive')
                     request.add_header('Accept-Encoding', 'gzip')
                     request.add_header('referer', base_url)
                     response = urllib2.urlopen(request)
-                    html = response.read() 
+                    html = response.read()
                     if(response.headers.get('content-encoding', None) == 'gzip'):
                         html = gzip.GzipFile(fileobj=StringIO.StringIO(html)).read()
 
@@ -169,16 +169,16 @@ class GoogleAPI:
                     self.randomSleep()
                     retry = retry - 1
                     continue
-                
+
                 except Exception, e:
                     print 'error:', e
                     retry = retry - 1
                     self.randomSleep()
                     continue
-        return search_results 
+        return search_results
 
-def load_user_agent():
-    fp = open('./user_agents', 'r')
+def load_user_agent(filename):
+    fp = open(filename, 'r')
 
     line  = fp.readline().strip('\n')
     while(line):
@@ -188,7 +188,7 @@ def load_user_agent():
 
 def crawler():
     # Load use agent string from file
-    load_user_agent()
+    load_user_agent('user_agents')
 
     # Create a GoogleAPI instance
     api = GoogleAPI()
